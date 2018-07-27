@@ -24,9 +24,9 @@ public class MazeFrame extends JFrame {
     private static final int FRAME_WIDTH = 500;
     private static final int FRAME_HEIGHT = 500;
 
-    private static final String PROMPT_STRING = "Type any key to start maze search . . . ";
-    private static final String SUCCESS_STRING = "Found the way out!";
-    private static final String FAIL_STRING = "No path out of maze.";
+    private static final String PROMPT_STRING = "Type any key to start maze search...";
+    private static final String SUCCESS_STRING = "Path was found!";
+    private static final String FAIL_STRING = "No path can be found from entry to exit.";
 
     /**
      * Sets up the GUI components with the given maze data.

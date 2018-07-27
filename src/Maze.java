@@ -129,7 +129,6 @@ public class Maze {
      * @return path from entry to exit
      */
     public LinkedList<MazeCoord> getPath() {
-
         return path;
 //        LinkedList<MazeCoord> cacheList = new LinkedList<>();
 //        LinkedList<MazeCoord> resultList;
@@ -169,6 +168,7 @@ public class Maze {
         findPath(entry);
         if (data[exitRow][exitCol] != Integer.MAX_VALUE) {
             tracePath(exit);
+            System.out.println(path);
             return true;
         } else {
             return false;
@@ -177,7 +177,6 @@ public class Maze {
 
     private void tracePath(MazeCoord pos) {
         path.add(pos);
-//        if (pos.getRow() != entry.getRow() || pos.getCol() != entry.getCol()) {
         if (!pos.equals(entry)) {
             tracePath(findMinNext(pos));
         }
