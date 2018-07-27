@@ -177,7 +177,8 @@ public class Maze {
 
     private void tracePath(MazeCoord pos) {
         path.add(pos);
-        if (pos.getRow() != entry.getRow() || pos.getCol() != entry.getCol()) {
+//        if (pos.getRow() != entry.getRow() || pos.getCol() != entry.getCol()) {
+        if (!pos.equals(entry)) {
             tracePath(findMinNext(pos));
         }
     }
