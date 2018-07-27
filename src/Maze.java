@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+
 /**
  * @author BorisMirage
  * Time: 2018/07/26 20:49
@@ -17,13 +18,18 @@ public class Maze {
     private int[][] data;
 
     private LinkedList<MazeCoord> path = new LinkedList<>();
-    private int entryRow;
-    private int entryCol;
     private int exitRow;
     private int exitCol;
     private int[][] visitTimes;      // Record coord visited times
 
 
+    /**
+     * Necessary data that to construct a maze.
+     *
+     * @param mazeData 2D int array that store the info of maze (wall, space, distance).
+     * @param startLoc MazeCoord start location
+     * @param exitLoc  MazeCoord exit location
+     */
     public Maze(int[][] mazeData, MazeCoord startLoc, MazeCoord exitLoc) {
 
         row = mazeData.length;
@@ -31,49 +37,97 @@ public class Maze {
         entry = startLoc;
         exit = exitLoc;
         data = mazeData;
-        entryRow = entry.getRow();
-        entryCol = entry.getCol();
+//        int entryRow = entry.getRow();
+//        int entryCol = entry.getCol();
         exitRow = exit.getRow();
         exitCol = exit.getCol();
         visitTimes = new int[numRows()][numCols()];
     }
 
+    /**
+     * Get number of rows in maze.
+     *
+     * @return number of rows in maze
+     */
     public int numRows() {
         return row;
     }
 
 
+    /**
+     * Get number of columns in maze.
+     *
+     * @return number of columns in maze.
+     */
     public int numCols() {
         return column;
     }
 
+    /**
+     * Check if input location has wall.
+     *
+     * @param loc input location
+     * @return true if input location has wall, otherwise return false.
+     */
     public boolean hasWallAt(MazeCoord loc) {
 
         /* FREE = false; WALL = true; */
         return data[loc.getRow()][loc.getCol()] == -1;
     }
 
+    /**
+     * Get entry MazeCoord.
+     *
+     * @return entry MazeCoord
+     */
     public MazeCoord getEntryLoc() {
 
         return entry;
     }
 
+    /**
+     * Get exit MazeCoord.
+     *
+     * @return exit MazeCoord
+     */
     public MazeCoord getExitLoc() {
         return exit;
     }
 
+    /**
+     * Get represented value store in mazeData based on input MazeCoord.
+     *
+     * @param coord input MazeCoord
+     * @return represented value store in 2D int array mazeData
+     */
     private int getData(MazeCoord coord) {
         return data[coord.getRow()][coord.getCol()];
     }
 
+    /**
+     * Get value store in mazeData based on input MazeCoord.
+     *
+     * @param coord input MazeCoord
+     * @param value value to be set
+     */
     private void setData(MazeCoord coord, int value) {
         data[coord.getRow()][coord.getCol()] = value;
     }
 
+    /**
+     * Add one to represented coord in visitTimes.
+     *
+     * @param coord input coord
+     */
     private void addVisit(MazeCoord coord) {
         visitTimes[coord.getRow()][coord.getCol()] += 1;
     }
 
+    /**
+     * Get path from entry to exit.
+     *
+     * @return path from entry to exit
+     */
     public LinkedList<MazeCoord> getPath() {
 
         return path;
@@ -234,5 +288,3 @@ public class Maze {
         }
     }
 }
-
-
