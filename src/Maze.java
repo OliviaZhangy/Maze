@@ -1,4 +1,5 @@
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * @author BorisMirage
@@ -21,6 +22,7 @@ public class Maze {
     private int exitRow;
     private int exitCol;
     private int[][] visitTimes;      // Record coord visited times
+    private Stack<MazeCoord> pathStack = new Stack<>();
 
 
     /**
@@ -37,8 +39,6 @@ public class Maze {
         entry = startLoc;
         exit = exitLoc;
         data = mazeData;
-//        int entryRow = entry.getRow();
-//        int entryCol = entry.getCol();
         exitRow = exit.getRow();
         exitCol = exit.getCol();
         visitTimes = new int[numRows()][numCols()];
@@ -169,13 +169,16 @@ public class Maze {
         findPath(entry);
         if (data[exitRow][exitCol] != Integer.MAX_VALUE) {
             tracePath(exit);
+            while (pathStack.size() != 0) {
+                path.add(pathStack.pop());
+            }
             return true;
         }
         return false;
     }
 
     private void tracePath(MazeCoord pos) {
-        path.add(pos);
+        pathStack.push(pos);
         if (!pos.equals(entry)) {
             tracePath(findMinNext(pos));
         }
