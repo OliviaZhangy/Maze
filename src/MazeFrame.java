@@ -1,3 +1,5 @@
+import jdk.nashorn.internal.ir.IfNode;
+
 import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -66,8 +68,8 @@ public class MazeFrame extends JFrame {
     }
 
 
-    class MazeKeyListener extends KeyAdapter { // inner class -- has access to outer
-        // object's instance variables
+    class MazeKeyListener extends KeyAdapter { // inner class -- has access to outer object's instance variables
+        int count = 0;
 
         /**
          * keyPressed is called when the user types a character.
@@ -75,16 +77,21 @@ public class MazeFrame extends JFrame {
          *
          * @param event What the user typed. Ignored here.
          */
+
         public void keyPressed(KeyEvent event) {
-            System.out.println("DEBUG: key pressed");
+            if (count == 0) {
+                count = 1;
+                System.out.println("DEBUG: key pressed");
 
-            System.out.println("DEBUG: doing maze search. . . ");
-            boolean success = maze.search();     // maze defined in enclosing MazeFrame
+                System.out.println("DEBUG: doing maze search. . . ");
+                boolean success = maze.search();     // maze defined in enclosing MazeFrame
 
-            mazeComponent.repaint();  // update drawing to show the results
+                mazeComponent.repaint();  // update drawing to show the results
 
-            System.out.println("DEBUG: " + getSearchMessage(success));
-            searchStatusLabel.setText(getSearchMessage(success));
+                System.out.println("DEBUG: " + getSearchMessage(success));
+                searchStatusLabel.setText(getSearchMessage(success));
+                System.out.println("Finished! ");
+            }
         }
     }
 }
