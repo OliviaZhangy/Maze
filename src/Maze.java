@@ -158,7 +158,7 @@ public class Maze {
     public boolean search() {
 
         /* One-element maze */
-        if (entry == exit) {
+        if (entry.equals(exit)) {
             path.add(exit);
             return true;
         }
