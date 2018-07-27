@@ -41,9 +41,10 @@ public class MazeCoord {
     }
 
     /**
-     * 
-     * @param other
-     * @return
+     * Override equals method to check whether two coord is same.
+     *
+     * @param other input object(MazeCoord)
+     * @return true if two coord is same, otherwise return false
      */
     public boolean equals(Object other) {
 
@@ -60,6 +61,11 @@ public class MazeCoord {
         return this.row == otherCoord.row && this.col == otherCoord.col;
     }
 
+    /**
+     * Convert MazeCoord to format string for better output.
+     *
+     * @return MazeCoord in string
+     */
     public String toString() {
         return "MazeCoord[row=" + row + ",col=" + col + "]";
     }
