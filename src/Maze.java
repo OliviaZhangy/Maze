@@ -17,13 +17,11 @@ public class Maze {
     private MazeCoord entry;
     private MazeCoord exit;
     private int[][] data;
-
     private LinkedList<MazeCoord> path = new LinkedList<>();
     private int exitRow;
     private int exitCol;
     private int[][] visitTimes;      // Record coord visited times
     private Stack<MazeCoord> pathStack = new Stack<>();
-
 
     /**
      * Necessary data that to construct a maze.
@@ -33,12 +31,11 @@ public class Maze {
      * @param exitLoc  MazeCoord exit location
      */
     public Maze(int[][] mazeData, MazeCoord startLoc, MazeCoord exitLoc) {
-
-        row = mazeData.length;
-        column = mazeData[0].length;
+        row = mazeData.length;          // total rows
+        column = mazeData[0].length;    // total columns
         entry = startLoc;
         exit = exitLoc;
-        data = mazeData;
+        data = mazeData;                // int array that store walls and distance
         exitRow = exit.getRow();
         exitCol = exit.getCol();
         visitTimes = new int[numRows()][numCols()];
@@ -130,30 +127,14 @@ public class Maze {
      */
     public LinkedList<MazeCoord> getPath() {
         return path;
-//        LinkedList<MazeCoord> cacheList = new LinkedList<>();
-//        LinkedList<MazeCoord> resultList;
-//
-//        /* Reverse to correct position when this path is reversed */
-//        if (path.size() != 0) {
-//            if (path.getFirst().getRow() != entryRow && path.getFirst().getCol() != entryCol) {
-//                for (int i = path.size() - 1; i >= 0; i--) {
-//                    cacheList.add(path.get(i));
-//                }
-//                path = cacheList;
-//            }
-//
-//            /* Add exit coord to path last */
-//            path.add(exit);
-//
-//            /* Make this path immutable */
-//            resultList = path;
-//            return resultList;
-//        } else {
-//            resultList = path;
-//            return resultList;
-//        }
     }
 
+    /**
+     * Search path from entry to exit.
+     * This method can be accessed outside of Maze class.
+     *
+     * @return true if there exist a path from entry to exit, otherwise false
+     */
     public boolean search() {
 
         if (hasWallAt(entry) || hasWallAt(exit)) {
@@ -166,7 +147,7 @@ public class Maze {
             return true;
         }
         setData(entry, 1);
-        findPath(entry);
+        fillDistance(entry);
         if (data[exitRow][exitCol] != Integer.MAX_VALUE) {
             tracePath(exit);
             while (pathStack.size() != 0) {
@@ -177,6 +158,13 @@ public class Maze {
         return false;
     }
 
+    /**
+     * Trace min distance recursively from exit to entry.
+     * Use stack to store MazeCoord during the tracing.
+     * When trace process is completed, path will be reversed in search method.
+     *
+     * @param pos current MazeCoord
+     */
     private void tracePath(MazeCoord pos) {
         pathStack.push(pos);
         if (!pos.equals(entry)) {
@@ -184,6 +172,13 @@ public class Maze {
         }
     }
 
+    /**
+     * Find min distance in four possible direction based on input MazeCoord.
+     * Have to check the availability of each direction first to avoid out of boundary or wall.
+     *
+     * @param cur input MazeCoord
+     * @return next MazeCoord that has min distance to entry
+     */
     private MazeCoord findMinNext(MazeCoord cur) {
         int min = getData(cur);
         MazeCoord next = cur;
@@ -196,6 +191,11 @@ public class Maze {
         return next;
     }
 
+    /**
+     * Greedy method to fill the mazeData array with min distance to entry.
+     *
+     * @param coord input MazeCoord
+     */
     private void greedy(MazeCoord coord) {
         int coordData = getData(coord);
         if (isAvailable(move(coord, 1), visitTimes) > -1 && coordData + 1 < getData(move(coord, 1))) {
@@ -212,32 +212,37 @@ public class Maze {
         }
     }
 
-    private void findPath(MazeCoord current) {
+    /**
+     * Fill mazeData recursively with min distance from entry to exit.
+     *
+     * @param current current MazeCoord
+     */
+    private void fillDistance(MazeCoord current) {
         greedy(current);
         MazeCoord next;
         if (isAvailable(move(current, 1), visitTimes) > 0) {
             next = move(current, 1);
             addVisit(next);
             setData(next, Math.min(getData(current) + 1, getData(next)));
-            findPath(next);
+            fillDistance(next);
         }
         if (isAvailable(move(current, 2), visitTimes) > 0) {
             next = move(current, 2);
             addVisit(next);
             setData(next, Math.min(getData(current) + 1, getData(next)));
-            findPath(next);
+            fillDistance(next);
         }
         if (isAvailable(move(current, 3), visitTimes) > 0) {
             next = move(current, 3);
             addVisit(next);
             setData(next, Math.min(getData(current) + 1, getData(next)));
-            findPath(next);
+            fillDistance(next);
         }
         if (isAvailable(move(current, 4), visitTimes) > 0) {
             next = move(current, 4);
             addVisit(next);
             setData(next, Math.min(getData(current) + 1, getData(next)));
-            findPath(next);
+            fillDistance(next);
         }
     }
 
@@ -258,6 +263,16 @@ public class Maze {
         }
     }
 
+    /**
+     * Move to input MazeCoord to selected direction.
+     *
+     * @param coord       input MazeCoord
+     * @param orientation 1 - move upward
+     *                    2 - move downward
+     *                    3 - move left
+     *                    4 - move right
+     * @return MazeCoord that after movement
+     */
     private MazeCoord move(MazeCoord coord, int orientation) {
 
         if (orientation == 1) {

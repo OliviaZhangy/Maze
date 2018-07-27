@@ -2,6 +2,9 @@ import java.io.*;
 import javax.swing.*;
 
 /**
+ * Main function of Maze
+ * The test maze file path should be regarded as program argument.
+ *
  * @author BorisMirage
  * Time: 2018/07/26 20:52
  * Created with IntelliJ IDEA
@@ -12,6 +15,11 @@ public class MazeViewer {
     private static final char WALL_CHAR = '1';
     private static final char FREE_CHAR = '0';
 
+    /**
+     * Main class that required maze file path as argument.
+     *
+     * @param args maze file path
+     */
     public static void main(String[] args) {
 
         String fileName = "";
@@ -34,6 +42,13 @@ public class MazeViewer {
         }
     }
 
+    /**
+     * Read maze file and convert it to Maze data
+     *
+     * @param fileName maze file path
+     * @return new MazeFrame for later usage
+     * @throws IOException file does not find via given path
+     */
     private static MazeFrame readMazeFile(String fileName) throws IOException {
 
         /* Create a File object and using Reader to read it. */
