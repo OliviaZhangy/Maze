@@ -156,23 +156,22 @@ public class Maze {
 
     public boolean search() {
 
+        if (hasWallAt(entry) || hasWallAt(exit)) {
+            return false;
+        }
+
         /* One-element maze */
         if (entry.equals(exit)) {
             path.add(exit);
             return true;
         }
-        if (hasWallAt(entry) || hasWallAt(exit)) {
-            return false;
-        }
         setData(entry, 1);
         findPath(entry);
         if (data[exitRow][exitCol] != Integer.MAX_VALUE) {
             tracePath(exit);
-            System.out.println(path);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     private void tracePath(MazeCoord pos) {
