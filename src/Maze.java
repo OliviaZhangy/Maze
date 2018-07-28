@@ -13,14 +13,10 @@ public class Maze {
     public static final boolean FREE = false;
     public static final boolean WALL = true;
 
-    private int row;
-    private int column;
     private MazeCoord entry;
     private MazeCoord exit;
     private int[][] data;
     private LinkedList<MazeCoord> path = new LinkedList<>();
-    private int exitRow;
-    private int exitCol;
     private int[][] visitTimes;      // Record coord visited times
     private Stack<MazeCoord> pathStack = new Stack<>();
 
@@ -32,14 +28,10 @@ public class Maze {
      * @param exitLoc  MazeCoord exit location
      */
     public Maze(int[][] mazeData, MazeCoord startLoc, MazeCoord exitLoc) {
-        row = mazeData.length;          // total rows
-        column = mazeData[0].length;    // total columns
         entry = startLoc;
         exit = exitLoc;
         data = mazeData;                // int array that store walls and distance
-        exitRow = exit.getRow();
-        exitCol = exit.getCol();
-        visitTimes = new int[numRows()][numCols()];
+        visitTimes = new int[data.length][data[0].length];
     }
 
     /**
@@ -48,7 +40,7 @@ public class Maze {
      * @return number of rows in maze
      */
     public int numRows() {
-        return row;
+        return data.length;
     }
 
 
@@ -58,7 +50,7 @@ public class Maze {
      * @return number of columns in maze.
      */
     public int numCols() {
-        return column;
+        return data[0].length;
     }
 
     /**
@@ -153,7 +145,7 @@ public class Maze {
         tryPath(entry);
 
         /* Check if exit is visited hence assure if there is a path or not */
-        if (data[exitRow][exitCol] != Integer.MAX_VALUE - 1) {
+        if (getData(exit) != Integer.MAX_VALUE - 1) {
             traceBackPath(exit);
             printData();
             path = new LinkedList<>(pathOutput(pathStack));
@@ -245,7 +237,6 @@ public class Maze {
             next = move(current, 1);
             addVisit(next);
             setMin(current, next);
-            setMin(next, current);
             System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
             tryPath(next);
         }
@@ -253,7 +244,6 @@ public class Maze {
             next = move(current, 2);
             addVisit(next);
             setMin(current, next);
-            setMin(next, current);
             System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
             tryPath(next);
         }
@@ -261,7 +251,6 @@ public class Maze {
             next = move(current, 3);
             addVisit(next);
             setMin(current, next);
-            setMin(next, current);
             System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
             tryPath(next);
         }
@@ -269,7 +258,6 @@ public class Maze {
             next = move(current, 4);
             addVisit(next);
             setMin(current, next);
-            setMin(next, current);
             System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
             tryPath(next);
         }
