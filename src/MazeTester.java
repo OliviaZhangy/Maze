@@ -2,6 +2,8 @@ import java.io.*;
 import java.util.Arrays;
 
 /**
+ * Test function
+ *
  * @author BorisMirage
  * Time: 2018/07/26 20:52
  * Created with IntelliJ IDEA
@@ -14,6 +16,11 @@ public class MazeTester {
     private static final char WALL_CHAR = '1';
     private static final char FREE_CHAR = '0';
 
+    /**
+     * Test main class.
+     *
+     * @param args argument, has no usage
+     */
     public static void main(String[] args) {
 
 //        String fileName = "/Users/borismirage/IdeaProjects/Maze/src/testfiles/upperLeftMaze";
@@ -30,6 +37,12 @@ public class MazeTester {
         }
     }
 
+    /**
+     * Same as readMazeFile class in MazeViewer.
+     *
+     * @param fileName maze file path
+     * @throws IOException file does not found exception
+     */
     private static void readMazeFile(String fileName) throws IOException {
 
         /* Create a File object and using Reader to read it. */
@@ -79,6 +92,15 @@ public class MazeTester {
 
     }
 
+    /**
+     * Test finding path algorithm.
+     *
+     * @param data        maze data
+     * @param visitRecord visit time record
+     * @param row         current position row
+     * @param col         current position column
+     * @return maze data that contains min distance from entry to exit
+     */
     private static int[][] res(int[][] data, int[][] visitRecord, int row, int col) {
 
         System.out.println(row + " " + col + " " + data[row][col]);
@@ -125,6 +147,15 @@ public class MazeTester {
         return data;
     }
 
+    /**
+     * Check position availability.
+     *
+     * @param data   maze data
+     * @param row    current position row
+     * @param column current position column
+     * @param v      visit time record
+     * @return if position is available
+     */
     private static boolean check(int[][] data, int row, int column, int[][] v) {
         if (row > data.length - 1 || row < 0) {
             return false;
@@ -135,6 +166,14 @@ public class MazeTester {
         return data[row][column] != -1 && v[row][column] < 5;
     }
 
+    /**
+     * Check position availability without visit time
+     *
+     * @param data   maze data
+     * @param row    current position row
+     * @param column current position column
+     * @return if position is available
+     */
     private static boolean checkA(int[][] data, int row, int column) {
         if (row > data.length - 1 || row < 0) {
             return false;

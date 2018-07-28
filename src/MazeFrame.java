@@ -1,5 +1,3 @@
-import jdk.nashorn.internal.ir.IfNode;
-
 import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -7,6 +5,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 /**
+ * Maze frame class.
+ * This class determine the shape of maze and path line that displayed.
+ *
  * @author BorisMirage
  * Time: 2018/07/26 20:52
  * Created with IntelliJ IDEA
