@@ -77,7 +77,7 @@ public class MazeViewer {
                 if (current == WALL_CHAR) {
                     readMazeData[i][j] = -1;
                 } else if (current == FREE_CHAR) {
-                    readMazeData[i][j] = Integer.MAX_VALUE;
+                    readMazeData[i][j] = Integer.MAX_VALUE - 1;
                 }
             }
         }
