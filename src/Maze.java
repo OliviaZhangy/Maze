@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Stack;
 
@@ -67,8 +68,6 @@ public class Maze {
      * @return true if input location has wall, otherwise return false.
      */
     public boolean hasWallAt(MazeCoord loc) {
-
-        /* FREE = false; WALL = true; */
         return data[loc.getRow()][loc.getCol()] == -1;
     }
 
@@ -78,7 +77,6 @@ public class Maze {
      * @return entry MazeCoord
      */
     public MazeCoord getEntryLoc() {
-
         return entry;
     }
 
@@ -131,6 +129,7 @@ public class Maze {
 
     /**
      * Search path from entry to exit.
+     * Since the min distance was found through exit to entry, path needs to be reversed in pathOutput.
      * This method can be accessed outside of Maze class.
      *
      * @return true if there exist a path from entry to exit, otherwise false
@@ -146,46 +145,71 @@ public class Maze {
             path.add(exit);
             return true;
         }
+
+        /* Set initial data into mazeData */
         setData(entry, 1);
-        fillDistance(entry);
-        if (data[exitRow][exitCol] != Integer.MAX_VALUE) {
-            tracePath(exit);
-            while (pathStack.size() != 0) {
-                path.add(pathStack.pop());
-            }
+
+        /* Fill each reachable MazeCoord in maze and put min distance into it */
+        tryPath(entry);
+
+        /* Check if exit is visited hence assure if there is a path or not */
+        if (data[exitRow][exitCol] != Integer.MAX_VALUE - 1) {
+            traceBackPath(exit);
+            printData();
+            path = new LinkedList<>(pathOutput(pathStack));
             return true;
         }
         return false;
     }
 
     /**
-     * Trace min distance recursively from exit to entry.
-     * Use stack to store MazeCoord during the tracing.
-     * When trace process is completed, path will be reversed in search method.
+     * Pop each element in stack into LinkedList path and return it as final path output.
+     *
+     * @param s stack that store entire path
+     * @return path LinkedList
+     */
+    private LinkedList<MazeCoord> pathOutput(Stack<MazeCoord> s) {
+        LinkedList<MazeCoord> inOrderPath = new LinkedList<>();
+
+        /* Make path in order */
+        while (s.size() != 0) {
+            inOrderPath.add(s.pop());
+        }
+        return inOrderPath;
+    }
+
+    /**
+     * Trace min distance recursively from exit to entry, which is in inverse order.
+     * Hence, use FIFO stack to store when adding.
+     * Pop each MazeCoord in pathOutput to reverse path in order.
      *
      * @param pos current MazeCoord
      */
-    private void tracePath(MazeCoord pos) {
+    private void traceBackPath(MazeCoord pos) {
+
+        /* Store current position */
         pathStack.push(pos);
+
+        /* If current position is not entry (path finish point), continue process */
         if (!pos.equals(entry)) {
-            tracePath(findMinNext(pos));
+            traceBackPath(findMinNext(pos));
         }
     }
 
     /**
      * Find min distance in four possible direction based on input MazeCoord.
-     * Have to check the availability of each direction first to avoid out of boundary or wall.
+     * Have to check the availability of each direction first to avoid wall or out of boundary.
      *
-     * @param cur input MazeCoord
+     * @param coord input MazeCoord
      * @return next MazeCoord that has min distance to entry
      */
-    private MazeCoord findMinNext(MazeCoord cur) {
-        int min = getData(cur);
-        MazeCoord next = cur;
+    private MazeCoord findMinNext(MazeCoord coord) {
+        int min = getData(coord);
+        MazeCoord next = coord;
         for (int i = 1; i < 5; i++) {
-            if (isAvailable(move(cur, i), visitTimes) > -1 && getData(move(cur, i)) < min) {
-                min = getData(move(cur, i));
-                next = move(cur, i);
+            if (checkCoord(move(coord, i), visitTimes) > -1 && getData(move(coord, i)) < min) {
+                min = getData(move(coord, i));
+                next = move(coord, i);
             }
         }
         return next;
@@ -197,18 +221,10 @@ public class Maze {
      * @param coord input MazeCoord
      */
     private void greedy(MazeCoord coord) {
-        int coordData = getData(coord);
-        if (isAvailable(move(coord, 1), visitTimes) > -1 && coordData + 1 < getData(move(coord, 1))) {
-            setData(move(coord, 1), coordData + 1);
-        }
-        if (isAvailable(move(coord, 2), visitTimes) > -1 && coordData + 1 < getData(move(coord, 2))) {
-            setData(move(coord, 2), coordData + 1);
-        }
-        if (isAvailable(move(coord, 3), visitTimes) > -1 && coordData + 1 < getData(move(coord, 3))) {
-            setData(move(coord, 3), coordData + 1);
-        }
-        if (isAvailable(move(coord, 4), visitTimes) > -1 && coordData + 1 < getData(move(coord, 4))) {
-            setData(move(coord, 4), coordData + 1);
+        for (int i = 1; i < 5; i++) {
+            if (checkCoord(move(coord, i), visitTimes) > -1) {
+                setMin(coord, move(coord, i));
+            }
         }
     }
 
@@ -217,32 +233,59 @@ public class Maze {
      *
      * @param current current MazeCoord
      */
-    private void fillDistance(MazeCoord current) {
+    private void tryPath(MazeCoord current) {
         greedy(current);
         MazeCoord next;
-        if (isAvailable(move(current, 1), visitTimes) > 0) {
+        for (int i = 1; i < 5; i++) {
+            if (checkCoord(move(current, i), visitTimes) > -1) {
+                setMin(move(current, i), current);
+            }
+        }
+        if (checkCoord(move(current, 1), visitTimes) > 0) {
             next = move(current, 1);
             addVisit(next);
-            setData(next, Math.min(getData(current) + 1, getData(next)));
-            fillDistance(next);
+            setMin(current, next);
+            setMin(next, current);
+            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
+            tryPath(next);
         }
-        if (isAvailable(move(current, 2), visitTimes) > 0) {
+        if (checkCoord(move(current, 2), visitTimes) > 0) {
             next = move(current, 2);
             addVisit(next);
-            setData(next, Math.min(getData(current) + 1, getData(next)));
-            fillDistance(next);
+            setMin(current, next);
+            setMin(next, current);
+            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
+            tryPath(next);
         }
-        if (isAvailable(move(current, 3), visitTimes) > 0) {
+        if (checkCoord(move(current, 3), visitTimes) > 0) {
             next = move(current, 3);
             addVisit(next);
-            setData(next, Math.min(getData(current) + 1, getData(next)));
-            fillDistance(next);
+            setMin(current, next);
+            setMin(next, current);
+            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
+            tryPath(next);
         }
-        if (isAvailable(move(current, 4), visitTimes) > 0) {
+        if (checkCoord(move(current, 4), visitTimes) > 0) {
             next = move(current, 4);
             addVisit(next);
-            setData(next, Math.min(getData(current) + 1, getData(next)));
-            fillDistance(next);
+            setMin(current, next);
+            setMin(next, current);
+            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
+            tryPath(next);
+        }
+    }
+
+    /**
+     * Set min distance in two continues coord.
+     *
+     * @param cur  coord 1
+     * @param next coord 2
+     */
+    private void setMin(MazeCoord cur, MazeCoord next) {
+        int curData = getData(cur);
+        int nextData = getData(next);
+        if (curData + 1 < nextData) {
+            setData(next, curData + 1);
         }
     }
 
@@ -253,10 +296,10 @@ public class Maze {
      * @param visitRecord 2D int array record visit times
      * @return -1 if out of bound or has wall, 0 if visited more than 4 times, or 1 if available.
      */
-    private int isAvailable(MazeCoord c, int[][] visitRecord) {
+    private int checkCoord(MazeCoord c, int[][] visitRecord) {
         if (c.getRow() > numRows() - 1 || c.getRow() < 0 || c.getCol() > numCols() - 1 || c.getCol() < 0 || hasWallAt(c)) {
             return -1;
-        } else if (visitRecord[c.getRow()][c.getCol()] > 5) {
+        } else if (visitRecord[c.getRow()][c.getCol()] > 4) {
             return 0;
         } else {
             return 1;
@@ -274,34 +317,29 @@ public class Maze {
      * @return MazeCoord that after movement
      */
     private MazeCoord move(MazeCoord coord, int orientation) {
+        int newCol = coord.getCol();
+        int newRow = coord.getRow();
 
         if (orientation == 1) {
-
-            /* Upward */
-            int newRow = coord.getRow() - 1;
-            int newColumn = coord.getCol();
-            return new MazeCoord(newRow, newColumn);
+            return new MazeCoord(newRow - 1, newCol);
         } else if (orientation == 2) {
-
-            /* Downward */
-            int newRow = coord.getRow() + 1;
-            int newColumn = coord.getCol();
-            return new MazeCoord(newRow, newColumn);
+            return new MazeCoord(newRow + 1, newCol);
         } else if (orientation == 3) {
-
-            /* Left */
-            int newRow = coord.getRow();
-            int newColumn = coord.getCol() - 1;
-            return new MazeCoord(newRow, newColumn);
+            return new MazeCoord(newRow, newCol - 1);
         } else if (orientation == 4) {
-
-            /* Right */
-            int newRow = coord.getRow();
-            int newColumn = coord.getCol() + 1;
-            return new MazeCoord(newRow, newColumn);
+            return new MazeCoord(newRow, newCol + 1);
         } else {
             System.out.println("Orientation Error!");
             return coord;
+        }
+    }
+
+    /**
+     * Print distance data for debug purpose.
+     */
+    private void printData() {
+        for (int[] aData : data) {
+            System.out.println(Arrays.toString(aData));
         }
     }
 }
