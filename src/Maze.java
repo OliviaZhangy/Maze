@@ -10,8 +10,8 @@ import java.util.Stack;
 
 public class Maze {
 
-    public static final boolean FREE = false;
-    public static final boolean WALL = true;
+   // public static final boolean FREE = false;
+    // public static final boolean WALL = true;
 
     private MazeCoord entry;
     private MazeCoord exit;
@@ -81,34 +81,6 @@ public class Maze {
         return exit;
     }
 
-    /**
-     * Get represented value store in mazeData based on input MazeCoord.
-     *
-     * @param coord input MazeCoord
-     * @return represented value store in 2D int array mazeData
-     */
-    private int getData(MazeCoord coord) {
-        return data[coord.getRow()][coord.getCol()];
-    }
-
-    /**
-     * Get value store in mazeData based on input MazeCoord.
-     *
-     * @param coord input MazeCoord
-     * @param value value to be set
-     */
-    private void setData(MazeCoord coord, int value) {
-        data[coord.getRow()][coord.getCol()] = value;
-    }
-
-    /**
-     * Add one to represented coord in visitTimes.
-     *
-     * @param coord input coord
-     */
-    private void addVisit(MazeCoord coord) {
-        visitTimes[coord.getRow()][coord.getCol()] += 1;
-    }
 
     /**
      * Get path from entry to exit.
@@ -127,155 +99,59 @@ public class Maze {
      * @return true if there exist a path from entry to exit, otherwise false
      */
     public boolean search() {
+        return searchHelper(entry,data,0,visitTimes);
+    }
 
-        if (hasWallAt(entry) || hasWallAt(exit)) {
-            return false;
-        }
-
-        /* One-element maze */
-        if (entry.equals(exit)) {
-            path.add(exit);
+    private boolean searchHelper(MazeCoord a, int[][]data, int direction, int[][] visitTimes){
+        //check the input and output position whether has wall or out of bound
+        if(a.getRow() > numRows() - 1 || a.getRow() < 0 || a.getCol() > numCols() - 1 || a.getCol() < 0 || hasWallAt(a)){
+            return false;}
+        if(exit.getRow() > numRows() - 1 || exit.getRow() < 0 || exit.getCol() > numCols() - 1 || exit.getCol() < 0 || hasWallAt(exit)){
+            return false;}
+        if(!a.equals(entry)&& visitTimes[a.getRow()][a.getCol()] > 3){
+            return false;}
+        if (a.equals(exit)){
             return true;
         }
-
-        /* Set initial data into mazeData */
-        setData(entry, 1);
-
-        /* Fill each reachable MazeCoord in maze and put min distance into it */
-        tryPath(entry);
-
-        /* Check if exit is visited hence assure if there is a path or not */
-        if (getData(exit) != Integer.MAX_VALUE - 1) {
-            traceBackPath(exit);
-            printData();
-            path = new LinkedList<>(pathOutput(pathStack));
-            return true;
+        //move up if it not comes from up
+        if(direction!=2){
+            visitTimes[a.getRow()][a.getCol()]++;
+            MazeCoord upLoc = move(a,1);
+            if(searchHelper(upLoc,data,2,visitTimes)){
+                data[upLoc.getRow()][upLoc.getCol()] = Math.min(data[a.getRow()][a.getCol()]+1,data[upLoc.getRow()][upLoc.getCol()]);
+                return true;
+            }
+        }
+        //move down if it not comes from down
+        if(direction!=1){
+            visitTimes[a.getRow()][a.getCol()]++;
+            MazeCoord downLoc = move(a,2);
+            if(searchHelper(downLoc,data,1,visitTimes)){
+                data[downLoc.getRow()][downLoc.getCol()] = Math.min(data[a.getRow()][a.getCol()]+1,data[downLoc.getRow()][downLoc.getCol()]);
+                return true;
+            }
+        }
+        //move left if it is not from left
+        if(direction!=4){
+            visitTimes[a.getRow()][a.getCol()]++;
+            MazeCoord leftLoc = move(a,3);
+            if(searchHelper(leftLoc,data,4,visitTimes)){
+                data[leftLoc.getRow()][leftLoc.getCol()] = Math.min(data[a.getRow()][a.getCol()]+1,data[leftLoc.getRow()][leftLoc.getCol()]);
+                return true;
+            }
+        }
+        //move right if it is not from right
+        if(direction!=3){
+            visitTimes[a.getRow()][a.getCol()]++;
+            MazeCoord rightLoc = move(a,4);
+            if(searchHelper(rightLoc,data,3,visitTimes)){
+                data[rightLoc.getRow()][rightLoc.getCol()] = Math.min(data[a.getRow()][a.getCol()]+1,data[rightLoc.getRow()][rightLoc.getCol()]);
+                return true;
+            }
         }
         return false;
     }
 
-    /**
-     * Pop each element in stack into LinkedList path and return it as final path output.
-     *
-     * @param s stack that store entire path
-     * @return path LinkedList
-     */
-    private LinkedList<MazeCoord> pathOutput(Stack<MazeCoord> s) {
-        LinkedList<MazeCoord> inOrderPath = new LinkedList<>();
-
-        /* Make path in order */
-        while (s.size() != 0) {
-            inOrderPath.add(s.pop());
-        }
-        return inOrderPath;
-    }
-
-    /**
-     * Trace min distance recursively from exit to entry, which is in inverse order.
-     * Hence, use FIFO stack to store when adding.
-     * Pop each MazeCoord in pathOutput to reverse path in order.
-     *
-     * @param pos current MazeCoord
-     */
-    private void traceBackPath(MazeCoord pos) {
-
-        /* Store current position */
-        pathStack.push(pos);
-
-        /* If current position is not entry (path finish point), continue process */
-        if (!pos.equals(entry)) {
-            traceBackPath(findMinNext(pos));
-        }
-    }
-
-    /**
-     * Find min distance in four possible direction based on input MazeCoord.
-     * Have to check the availability of each direction first to avoid wall or out of boundary.
-     *
-     * @param coord input MazeCoord
-     * @return next MazeCoord that has min distance to entry
-     */
-    private MazeCoord findMinNext(MazeCoord coord) {
-        int min = getData(coord);
-        MazeCoord next = coord;
-        for (int i = 1; i < 5; i++) {
-            if (checkCoord(move(coord, i), visitTimes) > -1 && getData(move(coord, i)) < min) {
-                min = getData(move(coord, i));
-                next = move(coord, i);
-            }
-        }
-        return next;
-    }
-
-    /**
-     * Greedy method to fill the mazeData array with min distance to entry.
-     *
-     * @param coord input MazeCoord
-     */
-    private void greedy(MazeCoord coord) {
-        for (int i = 1; i < 5; i++) {
-            if (checkCoord(move(coord, i), visitTimes) > -1) {
-                setMin(coord, move(coord, i));
-            }
-        }
-    }
-
-    /**
-     * Fill mazeData recursively with min distance from entry to exit.
-     *
-     * @param current current MazeCoord
-     */
-    private void tryPath(MazeCoord current) {
-        greedy(current);
-        MazeCoord next;
-        for (int i = 1; i < 5; i++) {
-            if (checkCoord(move(current, i), visitTimes) > -1) {
-                setMin(move(current, i), current);
-            }
-        }
-        if (checkCoord(move(current, 1), visitTimes) > 0) {
-            next = move(current, 1);
-            addVisit(next);
-            setMin(current, next);
-            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
-            tryPath(next);
-        }
-        if (checkCoord(move(current, 2), visitTimes) > 0) {
-            next = move(current, 2);
-            addVisit(next);
-            setMin(current, next);
-            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
-            tryPath(next);
-        }
-        if (checkCoord(move(current, 3), visitTimes) > 0) {
-            next = move(current, 3);
-            addVisit(next);
-            setMin(current, next);
-            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
-            tryPath(next);
-        }
-        if (checkCoord(move(current, 4), visitTimes) > 0) {
-            next = move(current, 4);
-            addVisit(next);
-            setMin(current, next);
-            System.out.println("Current: " + current.toString() + " " + getData(current) + " Next: " + next.toString() + " " + getData(next));
-            tryPath(next);
-        }
-    }
-
-    /**
-     * Set min distance in two continues coord.
-     *
-     * @param cur  coord 1
-     * @param next coord 2
-     */
-    private void setMin(MazeCoord cur, MazeCoord next) {
-        int curData = getData(cur);
-        int nextData = getData(next);
-        if (curData + 1 < nextData) {
-            setData(next, curData + 1);
-        }
-    }
 
     /**
      * Check if input position can be moved to.
@@ -287,7 +163,7 @@ public class Maze {
     private int checkCoord(MazeCoord c, int[][] visitRecord) {
         if (c.getRow() > numRows() - 1 || c.getRow() < 0 || c.getCol() > numCols() - 1 || c.getCol() < 0 || hasWallAt(c)) {
             return -1;
-        } else if (visitRecord[c.getRow()][c.getCol()] > 4) {
+        } else if (visitRecord[c.getRow()][c.getCol()] > 3) {
             return 0;
         } else {
             return 1;
